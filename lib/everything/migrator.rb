@@ -3,6 +3,7 @@
 require_relative "migrator/version"
 require 'yaml'
 require 'fileutils'
+require 'date'
 
 module Everything
   class Migrator
@@ -33,7 +34,7 @@ module Everything
           new_md_path = File.join(@root_path, new_md_name)
 
           if File.exist?(index_yaml_path)
-            yaml_content = YAML.load_file(index_yaml_path)
+            yaml_content = YAML.safe_load_file(index_yaml_path, permitted_classes: [Date])
             yaml_front_matter = YAML.dump(yaml_content)
 
             md_content = File.read(index_md_path)
