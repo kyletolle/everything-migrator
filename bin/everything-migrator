@@ -14,26 +14,47 @@ options = {
 
 # Parse command-line options
 OptionParser.new do |opts|
-  opts.banner = "Usage: everything-migrator [options] [root_path] [single_piece_name]"
+  opts.banner = "Usage: everything-migrator [root_path] [options]"
 
   opts.on("-k", "--keep-in-subfolder", "Keep files in subfolder") do
     options[:keep_in_subfolder] = true
   end
+
+  opts.on("-s", "--single-piece", "Treat the root path as the location of a single piece") do
+    options[:single_piece] = true
+  end
 end.parse!
 
-# Capture the root path from arguments or default to the current directory
-root_path = ARGV[0] || Dir.pwd
-# Capture the optional single piece name argument
-single_piece_name = ARGV[1] || nil
+# Capture the root path from arguments
+root_path = ARGV[0]
 
-migrator = Everything::Migrator.new(root_path)
+if (root_path.nil? && !options[:single_piece])
+  puts "Error: Single piece mode requires a root path"
+  exit 1
+end
+
+# We've already ensured we have a root path if we're sure we'll need it
+# If the root path is not specified, default to the current directory
+root_path_to_use = root_path || Dir.pwd
+
+if !File.directory?(root_path_to_use)
+  puts "Error: Root path does not exist or is not a directory"
+  exit 1
+end
+
+# If in single piece mode, use the directory containing the piece as the root path
+if options[:single_piece]
+  single_piece_name = File.basename(root_path)
+  root_path_to_use = File.dirname(root_path)
+end
+
+migrator = Everything::Migrator.new(root_path_to_use)
 # Initialize the migrator
+# Run the migration, either for all pieces or a specific piece
 if single_piece_name
   puts "Migrating single piece: #{single_piece_name}"
   migrator.migrate_piece(single_piece_name, options[:keep_in_subfolder])
 else
-  puts "Migrating all pieces in root path: #{root_path}"
-migrator.migrate_pieces_v1_to_v2(options[:keep_in_subfolder])
+  puts "Migrating all pieces in root path: #{root_path_to_use}"
+  migrator.migrate_pieces_v1_to_v2(options[:keep_in_subfolder])
 end
-
-# Run the migration, either for all pieces or a specific piece
