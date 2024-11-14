@@ -78,7 +78,7 @@ module Everything
       else
         # Process all pieces in the root path
         Dir.foreach(@root_path) do |piece_folder|
-          next if piece_folder == '.' || piece_folder == '..'
+          next if piece_folder == '.' || piece_folder == '..' || piece_folder.start_with?('_')
 
           piece_path = File.join(@root_path, piece_folder)
           next unless File.directory?(piece_path)
