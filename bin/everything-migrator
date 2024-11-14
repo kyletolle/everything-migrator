@@ -1,4 +1,6 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
+
 # Add the lib directory to the load path
 $LOAD_PATH.unshift(File.expand_path("../lib", __dir__))
 
@@ -6,5 +8,17 @@ require 'everything/migrator'
 
 # Capture the root path from arguments or default to the current directory
 root_path = ARGV[0] || Dir.pwd
+# Capture the optional single piece path argument
+single_piece_path = ARGV[1]
+
+# Initialize the migrator
 migrator = Everything::Migrator.new(root_path)
-migrator.migrate_pieces_v1_to_v2
+
+# Run the migration, either for all pieces or a specific piece
+if single_piece_path
+  puts "Migrating single piece: #{single_piece_path}"
+  migrator.migrate_pieces_v1_to_v2(single_piece_path)
+else
+  puts "Migrating all pieces in root path: #{root_path}"
+  migrator.migrate_pieces_v1_to_v2
+end
