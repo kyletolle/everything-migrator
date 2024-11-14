@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Snake Case to Title Case Converter</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+    h2 { margin-top: 20px; color: #333; }
+    #inputBox { width: 80%; padding: 10px; font-size: 1em; }
+    #message { color: green; font-size: 0.9em; margin-top: 10px; }
+  </style>
+</head>
+<body>
+
+  <h1>Paste Snake Case Text to Convert to Title Case</h1>
+  <textarea id="inputBox" rows="4" placeholder="Paste your snake_case text here..."></textarea>
+  <h2 id="outputText"></h2>
+  <p id="message"></p>
+
+  <script>
+    const inputBox = document.getElementById("inputBox");
+    const outputText = document.getElementById("outputText");
+    const message = document.getElementById("message");
+
+    // Function to convert snake_case to Title Case
+    function snakeToTitleCase(text) {
+      return text
+        .split(/[_-]/) // Split at underscores
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()) // Capitalize each word
+        .join(' '); // Join with spaces
+    }
+
+    // Event listener for paste
+    inputBox.addEventListener("paste", async (event) => {
+      event.preventDefault();
+
+      // Get pasted text
+      const pastedText = (event.clipboardData || window.clipboardData).getData("text");
+
+      // Convert to Title Case
+      const titleCasedText = snakeToTitleCase(pastedText);
+
+      // Display the Title Cased text in <h2>
+      outputText.textContent = titleCasedText;
+
+      // Copy to clipboard
+      await navigator.clipboard.writeText(titleCasedText);
+
+      // Show message
+      message.textContent = "Converted from snake_case to Title Case and copied to clipboard!";
+    });
+  </script>
+
+</body>
+</html>
