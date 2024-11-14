@@ -17,78 +17,81 @@ module Everything
     end
 
     # Migrate a single piece folder
-    def migrate_piece(piece_path)
-      piece_folder = File.basename(piece_path)
+    def migrate_piece(piece_name, keep_in_subfolder = false)
+      begin
+        piece_folder = piece_name
+        piece_path = File.join(@root_path, piece_folder)
 
-      index_md_path = File.join(piece_path, 'index.md')
-      index_yaml_path = File.join(piece_path, 'index.yaml')
+        working_md_name = 'index.md'
+        working_md_path = File.join(piece_path, working_md_name)
+        index_yaml_path = File.join(piece_path, 'index.yaml')
 
-      if File.exist?(index_md_path)
-        # Generate the new name based on the folder name
-        new_md_name = "#{piece_folder}.md"
-        new_md_path = File.join(@root_path, new_md_name)
+        if File.exist?(working_md_path)
+          # Determine the new name for the md file
+          # Convert kebab-case to Title Case for the filename
+          title_name = title_case(piece_folder)
+          new_md_name = "#{title_name}.md"
+          new_md_path = File.join(piece_path, new_md_name)
 
-        if File.exist?(index_yaml_path)
-          # Allow Date class in YAML loading
-          yaml_content = YAML.safe_load_file(index_yaml_path, permitted_classes: [Date])
-          yaml_front_matter = YAML.dump(yaml_content)
+          # Rename the md file to the new name
+          FileUtils.mv(working_md_path, new_md_path)
+          working_md_name = new_md_name
+          working_md_path = new_md_path
 
-          md_content = File.read(index_md_path)
-          File.open(new_md_path, 'w') do |file|
-            file.puts("#{yaml_front_matter}---\n")
-            file.puts(md_content)
+          # If yaml exists, convert it to front matter
+          if File.exist?(index_yaml_path)
+            # Allow Date class in YAML loading
+            yaml_content = YAML.safe_load_file(index_yaml_path, permitted_classes: [Date])
+            yaml_front_matter = YAML.dump(yaml_content)
+
+            md_content = File.read(working_md_path)
+            File.open(working_md_path, 'w') do |file|
+              file.puts("#{yaml_front_matter}---\n")
+              file.puts(md_content)
+            end
+            File.delete(index_yaml_path)
           end
-          File.delete(index_yaml_path)
-        else
-          FileUtils.mv(index_md_path, new_md_path)
         end
 
-        # Delete the original index.md explicitly
-        File.delete(index_md_path) if File.exist?(index_md_path)
-
-        # Convert to Title Case for the final filename
-        title_name = title_case(piece_folder)
-        final_md_name = "#{title_name}.md"
-
-        # Avoid renaming if the only difference is in case
-        unless new_md_name.downcase == final_md_name.downcase
-          temp_name = "#{new_md_name}.tmp"
-          FileUtils.mv(new_md_path, File.join(@root_path, temp_name))
-          FileUtils.mv(File.join(@root_path, temp_name), File.join(@root_path, final_md_name))
+        if keep_in_subfolder
+          return;
         end
-      end
 
-      # Move any other files to root level
-      Dir.glob(File.join(piece_path, '*')).each do |file|
-        next if file.end_with?('index.md') || file.end_with?('index.yaml')
-        FileUtils.mv(file, @root_path)
-      end
+        # Move the new md file to the root level
+        FileUtils.mv(working_md_path, @root_path)
 
-      # Remove the empty folder
-      Dir.rmdir(piece_path) if Dir.empty?(piece_path)
+        # Move any other files to root level
+        Dir.glob(File.join(piece_path, '*')).each do |file|
+          next if file.end_with?('index.md') || file.end_with?('index.yaml')
+          FileUtils.mv(file, @root_path)
+        end
+
+        # Remove the empty folder
+        Dir.rmdir(piece_path) if Dir.empty?(piece_path)
+      rescue StandardError => e
+        puts "Error migrating piece: #{piece_name}"
+        puts e.message
+        return
+      end
     end
 
     # Migrate all pieces or a single specified piece
-    def migrate_pieces_v1_to_v2(single_piece_path = nil)
+    def migrate_pieces_v1_to_v2(keep_in_subfolder = false)
       puts "Migrating `everything` project from piece version 1 to piece version 2 structure..."
 
-      if single_piece_path
-        # Process a single specified piece
-        migrate_piece(single_piece_path)
-      else
-        # Process all pieces in the root path
-        Dir.foreach(@root_path) do |piece_folder|
-          next if piece_folder == '.' || piece_folder == '..' || piece_folder.start_with?('_')
+      # Process all pieces in the root path
+      Dir.foreach(@root_path) do |piece_folder|
+        next if piece_folder == '.' || piece_folder == '..' || piece_folder.start_with?('_')
 
-          piece_path = File.join(@root_path, piece_folder)
-          next unless File.directory?(piece_path)
+        piece_path = File.join(@root_path, piece_folder)
+        next unless File.directory?(piece_path)
+        piece_name = piece_folder
 
-          begin
-            migrate_piece(piece_path)
-          rescue StandardError => e
-            puts "Error migrating piece: #{piece_folder}"
-            puts e.message
-          end
+        begin
+          migrate_piece(piece_name, keep_in_subfolder: keep_in_subfolder)
+        rescue StandardError => e
+          puts "Error migrating piece as part of batch: #{piece_folder}"
+          puts e.message
         end
       end
 

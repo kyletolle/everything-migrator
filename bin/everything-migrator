@@ -5,20 +5,35 @@
 $LOAD_PATH.unshift(File.expand_path("../lib", __dir__))
 
 require 'everything/migrator'
+require 'optparse'
+
+# Default options
+options = {
+  keep_in_subfolder: false
+}
+
+# Parse command-line options
+OptionParser.new do |opts|
+  opts.banner = "Usage: everything-migrator [options] [root_path] [single_piece_name]"
+
+  opts.on("-k", "--keep-in-subfolder", "Keep files in subfolder") do
+    options[:keep_in_subfolder] = true
+  end
+end.parse!
 
 # Capture the root path from arguments or default to the current directory
 root_path = ARGV[0] || Dir.pwd
-# Capture the optional single piece path argument
-single_piece_path = ARGV[1]
+# Capture the optional single piece name argument
+single_piece_name = ARGV[1] || nil
 
-# Initialize the migrator
 migrator = Everything::Migrator.new(root_path)
-
-# Run the migration, either for all pieces or a specific piece
-if single_piece_path
-  puts "Migrating single piece: #{single_piece_path}"
-  migrator.migrate_pieces_v1_to_v2(single_piece_path)
+# Initialize the migrator
+if single_piece_name
+  puts "Migrating single piece: #{single_piece_name}"
+  migrator.migrate_piece(single_piece_name, options[:keep_in_subfolder])
 else
   puts "Migrating all pieces in root path: #{root_path}"
-  migrator.migrate_pieces_v1_to_v2
+migrator.migrate_pieces_v1_to_v2(options[:keep_in_subfolder])
 end
+
+# Run the migration, either for all pieces or a specific piece
