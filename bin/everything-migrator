@@ -9,7 +9,8 @@ require 'optparse'
 
 # Default options
 options = {
-  keep_in_subfolder: false
+  keep_in_subfolder: false,
+  skip_pieces: []
 }
 
 # Parse command-line options
@@ -17,11 +18,16 @@ OptionParser.new do |opts|
   opts.banner = "Usage: everything-migrator [root_path] [options]"
 
   opts.on("-k", "--keep-in-subfolder", "Keep files in subfolder") do
-    options[:keep_in_subfolder] = true
+    options[:keep_in_subfolder] = false
   end
 
   opts.on("-s", "--single-piece", "Treat the root path as the location of a single piece") do
     options[:single_piece] = true
+  end
+
+  # Add option to parse skip pieces
+  opts.on("-x", "--skip-pieces x,y,z", Array, "List of pieces to skip") do |list|
+    options[:skip_pieces] = list
   end
 end.parse!
 
@@ -56,5 +62,5 @@ if single_piece_name
   migrator.migrate_piece(single_piece_name, options[:keep_in_subfolder])
 else
   puts "Migrating all pieces in root path: #{root_path_to_use}"
-  migrator.migrate_pieces_v1_to_v2(options[:keep_in_subfolder])
+  migrator.migrate_pieces_v1_to_v2(options[:keep_in_subfolder], options[:skip_pieces])
 end

@@ -76,12 +76,13 @@ module Everything
     end
 
     # Migrate all pieces or a single specified piece
-    def migrate_pieces_v1_to_v2(keep_in_subfolder = false)
+    def migrate_pieces_v1_to_v2(keep_in_subfolder = false, skip_pieces = [])
       puts "Migrating `everything` project from piece version 1 to piece version 2 structure..."
 
       # Process all pieces in the root path
       Dir.foreach(@root_path) do |piece_folder|
         next if piece_folder == '.' || piece_folder == '..' || piece_folder.start_with?('_')
+        next if skip_pieces.include?(piece_folder)
 
         piece_path = File.join(@root_path, piece_folder)
         next unless File.directory?(piece_path)
