@@ -35,14 +35,14 @@ end.parse!
 # Capture the root path from arguments
 root_path = ARGV[0]
 
-if (root_path.nil? && !options[:single_piece])
-  puts "Error: Single piece mode requires a root path"
+if (root_path.nil? || root_path.empty?)
+  puts "Error: Root path is required"
   exit 1
 end
 
 # We've already ensured we have a root path if we're sure we'll need it
 # If the root path is not specified, default to the current directory
-root_path_to_use = root_path || Dir.pwd
+root_path_to_use = root_path
 
 if !File.directory?(root_path_to_use)
   puts "Error: Root path does not exist or is not a directory"

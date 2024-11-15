@@ -8,7 +8,7 @@ require 'date'  # Ensure Date class is loaded for YAML processing
 module Everything
   class Migrator
     def initialize(root_path)
-      @root_path = root_path || Dir.pwd
+      @root_path = root_path
     end
 
     # Convert dash-case to Title Case
