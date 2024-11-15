@@ -58,7 +58,7 @@ module Everything
         end
 
         # Move the new md file to the root level
-        FileUtils.mv(working_md_path, @root_path)
+        FileUtils.mv(working_md_path, @root_path) if File.exist?(working_md_path)
 
         # Move any other files to root level
         Dir.glob(File.join(piece_path, '*')).each do |file|
