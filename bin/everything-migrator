@@ -63,5 +63,6 @@ if single_piece_name
   migrator.migrate_piece(single_piece_name, options[:keep_in_subfolder])
 else
   puts "Migrating all pieces in root path: #{root_path_to_use}"
+  puts "Options: #{options}"
   migrator.migrate_pieces_v1_to_v2(options[:keep_in_subfolder], options[:skip_pieces])
 end
