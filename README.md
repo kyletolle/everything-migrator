@@ -1,34 +1,48 @@
 # Everything::Migrator
 
-TODO: Delete this and the text below, and describe your gem
-
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/everything/migrator`. To experiment with that code, run `bin/console` for an interactive prompt.
+For migrating `everything` pieces from v1 to v2.
 
 ## Installation
 
-TODO: Replace `UPDATE_WITH_YOUR_GEM_NAME_PRIOR_TO_RELEASE_TO_RUBYGEMS_ORG` with your gem name right after releasing it to RubyGems.org. Please do not do it earlier due to security reasons. Alternatively, replace this section with instructions to install your gem from git if you don't plan to release to RubyGems.org.
-
-Install the gem and add to the application's Gemfile by executing:
-
-    $ bundle add UPDATE_WITH_YOUR_GEM_NAME_PRIOR_TO_RELEASE_TO_RUBYGEMS_ORG
-
-If bundler is not being used to manage dependencies, install the gem by executing:
-
-    $ gem install UPDATE_WITH_YOUR_GEM_NAME_PRIOR_TO_RELEASE_TO_RUBYGEMS_ORG
+Clone from github
 
 ## Usage
 
-TODO: Write usage instructions here
+From the `everything-migrator` folder, you can run this script in a few ways.
 
-## Development
+### Use Cases
 
-After checking out the repo, run `bin/setup` to install dependencies. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+1. Migrate all pieces under a path and move all the files from those piece folders up into the root folder
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and the created tag, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+```
+ruby bin/everything-migrator  ~/your/everything/path/
+```
 
-## Contributing
+2. Migrate a single piece at a path and move all its files from the piece up into the root folder
+```
+ruby bin/everything-migrator  ~/your/everything/path/old-piece --single-piece
+```
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/everything-migrator.
+3. Migrate a single piece at a path but keep its files inside that piece folder
+```
+ruby bin/everything-migrator  ~/your/everything/path/old-piece --single-piece --keep-in-subfolder
+```
+
+4. Migrate all pieces under a path except for a comma separated list of pieces/folders you want to entirely ignore. Can be used with either `--keep-in-subfolder` or not
+
+```
+ruby bin/everything-migrator  ~/your/everything/path/ --skip-pieces this-one,that-one
+```
+
+### Options
+
+- `--keep-in-subfolder`, `-k` - Keep all pieces folders in the subfolder instead of moving them to the root
+- `--single-piece`, `-s` - Treat the root path as the location of a single piece
+- `--skip-pieces`, `-x` - List of pieces to skip
+
+## Development & Contributing
+
+This was mostly a one-off script, so probably won't have need for this.
 
 ## License
 
