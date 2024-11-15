@@ -36,9 +36,9 @@ module Everything
 
           # Rename the md file to the new name
           FileUtils.mv(working_md_path, new_md_path)
+          puts "Renamed #{working_md_name} to #{new_md_name}"
           working_md_name = new_md_name
           working_md_path = new_md_path
-          puts "Renamed #{working_md_name} to #{new_md_name}"
 
           # If yaml exists, convert it to front matter
           if File.exist?(index_yaml_path)
