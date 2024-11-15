@@ -9,6 +9,7 @@ require 'optparse'
 
 # Default options
 options = {
+  single_piece: false,
   keep_in_subfolder: false,
   skip_pieces: []
 }
@@ -18,7 +19,7 @@ OptionParser.new do |opts|
   opts.banner = "Usage: everything-migrator [root_path] [options]"
 
   opts.on("-k", "--keep-in-subfolder", "Keep files in subfolder") do
-    options[:keep_in_subfolder] = false
+    options[:keep_in_subfolder] = true
   end
 
   opts.on("-s", "--single-piece", "Treat the root path as the location of a single piece") do
